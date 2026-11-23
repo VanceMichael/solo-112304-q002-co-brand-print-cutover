@@ -1,0 +1,202 @@
+{
+  "initial": {
+    "/brand/catalog": {
+      "status": 200,
+      "kind": "html",
+      "body": "<main><h1>北地联名目录</h1><a hreflang=\"fr\" href=\"/brand/eu/g20\">欧区 G20</a><a hreflang=\"zh\" href=\"/brand/cn/g20\">内销 G20</a></main>"
+    },
+    "/brand/eu/g20": {
+      "status": 200,
+      "kind": "html",
+      "body": "<article data-region=\"EU\" data-style=\"G20\"><details><summary>法国市场声明</summary><a href=\"/brand/signed/FR-7.xml\">授权 FR-7</a></details><a href=\"/brand/shared/manual.html\">通用说明</a></article>"
+    },
+    "/brand/cn/g20": {
+      "status": 200,
+      "kind": "html",
+      "body": "<article data-region=\"CN\" data-style=\"G20\"><a href=\"/brand/signed/CN-2.xml\">授权 CN-2</a></article>"
+    },
+    "/brand/shared/manual.html": {
+      "status": 200,
+      "kind": "html",
+      "body": "<article lang=\"fr\"><p>电量仅为参考，非印签声明。</p></article>"
+    },
+    "/brand/signed/FR-7.xml": {
+      "status": 200,
+      "kind": "xml",
+      "body": "<authorization id=\"FR-7\" region=\"EU\" lang=\"fr\" issued=\"2026-11-01\" style=\"G20\"><claim component=\"H7\" field=\"capacity\">18 Wh</claim><claim field=\"composition\">85% PA</claim></authorization>"
+    },
+    "/brand/signed/CN-2.xml": {
+      "status": 200,
+      "kind": "xml",
+      "body": "<authorization id=\"CN-2\" region=\"CN\" lang=\"zh\" issued=\"2026-10-01\" style=\"G20\"><claim component=\"H7\" field=\"capacity\">18 Wh</claim></authorization>"
+    },
+    "/brand/notices": {
+      "status": 200,
+      "kind": "json",
+      "body": {
+        "notices": []
+      }
+    },
+    "/factory/cartons": {
+      "status": 200,
+      "kind": "json",
+      "body": {
+        "cartons": [
+          {
+            "carton": "C-401",
+            "style": "G20",
+            "component": "H7",
+            "component_lot": 399,
+            "region": "EU",
+            "lang": "fr",
+            "qty": 7,
+            "print_line": "P-4A",
+            "format": "L120"
+          },
+          {
+            "carton": "C-402",
+            "style": "G20",
+            "component": "H7",
+            "component_lot": 410,
+            "region": "EU",
+            "lang": "fr",
+            "qty": 11,
+            "print_line": "P-4A",
+            "format": "L120"
+          },
+          {
+            "carton": "C-403",
+            "style": "G20",
+            "component": "H7",
+            "component_lot": 414,
+            "region": "CN",
+            "lang": "zh",
+            "qty": 9,
+            "print_line": "P-4B",
+            "format": "L100"
+          },
+          {
+            "carton": "C-404",
+            "style": "G20",
+            "component": "H8",
+            "component_lot": 415,
+            "region": "EU",
+            "lang": "fr",
+            "qty": 5,
+            "print_line": "P-4C",
+            "format": "L120"
+          }
+        ]
+      }
+    },
+    "/printer/queue": {
+      "status": 200,
+      "kind": "json",
+      "body": {
+        "lines": [
+          {
+            "id": "P-4A",
+            "edition": "FR-7",
+            "printed": 8,
+            "queued": 10
+          },
+          {
+            "id": "P-4B",
+            "edition": "CN-2",
+            "printed": 0,
+            "queued": 9
+          },
+          {
+            "id": "P-4C",
+            "edition": "FR-7",
+            "printed": 0,
+            "queued": 5
+          }
+        ]
+      }
+    }
+  },
+  "changes": [
+    {
+      "label": "联名方发布局部印签更新",
+      "routes": {
+        "/brand/notices": {
+          "status": 200,
+          "kind": "json",
+          "body": {
+            "notices": [
+              {
+                "id": "N-FR-8",
+                "component": "H7",
+                "from_lot": 405,
+                "region": "EU",
+                "new": "FR-8",
+                "signed": "/brand/signed/FR-8.xml",
+                "carry": {
+                  "composition": "FR-7"
+                }
+              }
+            ]
+          }
+        },
+        "/brand/signed/FR-8.xml": {
+          "status": 200,
+          "kind": "xml",
+          "body": "<authorization id=\"FR-8\" region=\"EU\" lang=\"fr\" issued=\"2026-11-20\" style=\"G20\"><claim component=\"H7\" field=\"capacity\">16 Wh</claim><carry field=\"composition\" from=\"FR-7\"/></authorization>"
+        }
+      }
+    },
+    {
+      "label": "印厂公布取消后的生产数",
+      "routes": {
+        "/printer/queue": {
+          "status": 200,
+          "kind": "json",
+          "body": {
+            "lines": [
+              {
+                "id": "P-4A",
+                "edition": "FR-7",
+                "printed": 9,
+                "queued": 0,
+                "cancelled": 9
+              },
+              {
+                "id": "P-4B",
+                "edition": "CN-2",
+                "printed": 9,
+                "queued": 0
+              },
+              {
+                "id": "P-4C",
+                "edition": "FR-7",
+                "printed": 0,
+                "queued": 5
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "forms": {
+    "/printer/portal": {
+      "operations": [
+        "print",
+        "cancel",
+        "replace"
+      ],
+      "identifier": "PRN",
+      "outcomes": {
+        "1": {
+          "cancel": {
+            "P-4A": "accepted",
+            "P-4B": "rejected",
+            "@response": "lost"
+          }
+        }
+      },
+      "browser": true
+    }
+  }
+}
