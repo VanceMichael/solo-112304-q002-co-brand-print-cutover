@@ -25,3 +25,44 @@ python3 -m unittest discover -s tests -v
 ## 合作端动作
 
 - `/printer/portal` 接受 `print`、`cancel`、`replace`。
+
+## 包贴换版工具 `packaging_tool`
+
+跟着印单核对客户网页实际发布的文字与签署件，并在上述门户完成交接。仅用
+Python 标准库（浏览器测试除外），可在隔离模式下运行：
+
+```sh
+# 只核对，不做门户交接
+python3 -m packaging_tool.cli --base http://127.0.0.1:8765 audit
+# 核对并在门户执行取消/替换/补印，回执持久化到 JSONL，重跑幂等
+python3 -m packaging_tool.cli --base http://127.0.0.1:8765 \
+    handoff --receipt-store receipts.jsonl
+# 已实物预配到换版箱上的旧贴张数（收件登记口径），用于隔离归类
+python3 -m packaging_tool.cli --base http://127.0.0.1:8765 \
+    --reserved '{"P-4A": 3}' handoff --receipt-store receipts.jsonl
+```
+
+### 模块划分
+
+- `sources.py`：从地区目录做有界同源遍历，区分普通链接与 `details/summary`
+  展开区链接，跟随共用说明页/可打印版本；只把 `/signed/` 或 XML 当签署件，
+  没有签署链接的叶子页登记为“未签署来源”，不能代替签署件。
+- `authorization.py`：授权严格按款式、区域、语言隔离，组件级与整款级声明
+  分开，整款声明不能扩用到可拆加热组件。公告从指定组件批号起生效，在途货
+  按实际组件领用批号决定版本；公告声明沿用旧版字段时，重新拉取旧版签署件，
+  确认同一适用对象的声明仍可核对，否则转主管确认。
+- `inventory.py`：逐印线核对已印、待印、取消与剩余有效张数。已印旧贴分为
+  可继续领用、隔离、等主管确认三类；共享一版贴的其他订单保留有效印量。
+  取消只针对未印部分，替换单以逐版回执的真实取消结果（accepted 且队列
+  印证）为前提，“暂时查不到回执”不会被当成取消成功。
+- `portal.py`：稳定业务请求号，同号原样重交取回同一回执；提交后短暂查不到
+  时先按请求号轮询逐版回执，确认无存根才用相同参数重交；409 不覆盖本地记录。
+- `service.py` / `cli.py`：编排快照、逐箱核对、印量规划与门户交接，输出
+  主管工单（文本或 JSON），保留适用对象、区域、语言、发行日和来源证据链。
+
+### 工单状态
+
+- `ready` 现行签署件覆盖，可贴/可领；`awaiting_edition` 新版生效等替换贴；
+  `suspended` 缺授权或声明，只暂停需要该语种和声明的订单行；
+  `pending_supervisor` 证据不足，等主管确认。
+
